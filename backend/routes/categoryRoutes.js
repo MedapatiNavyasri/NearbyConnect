@@ -1,0 +1,34 @@
+import express from 'express'
+import Category from '../models/Category.js'
+import { protect, requireRole } from '../middleware/auth.js'
+
+const router = express.Router()
+
+router.get('/', async (req, res, next) => {
+  try {
+    const categories = await Category.find().sort({ name: 1 })
+    res.json(categories)
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.post('/', protect, requireRole('admin'), async (req, res, next) => {
+  try {
+    const category = await Category.create(req.body)
+    res.status(201).json(category)
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.delete('/:id', protect, requireRole('admin'), async (req, res, next) => {
+  try {
+    await Category.findByIdAndDelete(req.params.id)
+    res.json({ message: 'Category removed' })
+  } catch (err) {
+    next(err)
+  }
+})
+
+export default router
