@@ -49,7 +49,7 @@ export default function BusinessCard({ business }) {
         <div className="mt-auto flex items-center gap-1.5 text-sm text-ink/70 pt-2 border-t border-line">
           <FiMapPin className="text-primary shrink-0" />
           <span>
-            {business.village} · {business.distanceMins} min away
+            {business.village} · {business.distanceMins ?? '--'} min away
           </span>
         </div>
       </div>
