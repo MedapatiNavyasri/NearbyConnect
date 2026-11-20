@@ -16,9 +16,9 @@ export function normalizeShop(shop) {
     address: shop.address,
     description: shop.description,
     services: shop.services || [],
-    cover: shop.cover || shop.logo || '',
     logo: shop.logo || '',
-    gallery: shop.gallery || [],
+    cover: shop.cover || '',
+    gallery: (shop.gallery || []).filter(Boolean),
     updates: shop.updates || [],
     reviews: shop.reviews || [],
   }
