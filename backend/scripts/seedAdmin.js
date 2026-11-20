@@ -1,5 +1,4 @@
-// Run once to create your first admin account:
-//   node scripts/seedAdmin.js admin@nearbyconnect.in yourStrongPassword "Admin Name"
+
 import 'dotenv/config'
 import bcrypt from 'bcrypt'
 import { connectDB } from '../config/db.js'
@@ -10,31 +9,45 @@ async function run() {
   const [, , email, password, name = 'Admin'] = process.argv
 
   if (!email || !password) {
-    console.log('Usage: node scripts/seedAdmin.js <email> <password> [name]')
+    console.log(
+      'Usage: node scripts/seedAdmin.js <email> <password> [name]'
+    )
     process.exit(1)
   }
 
   await connectDB()
 
   const existing = await User.findOne({ email })
+
   if (existing) {
-    console.log(`A user with email ${email} already exists (role: ${existing.role}).`)
-    if (existing.role !== 'admin') {
-      existing.role = 'admin'
-      await existing.save()
-      console.log('Updated that user\'s role to admin.')
-    }
-    process.exit(0)
+    // Update existing admin account
+    existing.name = name
+    existing.password = await bcrypt.hash(password, 10)
+    existing.role = 'admin'
+
+    await existing.save()
+
+    console.log('Admin name and password updated successfully!')
+  } else {
+    // Create a new admin account
+    const hashed = await bcrypt.hash(password, 10)
+
+    await User.create({
+      name,
+      email,
+      password: hashed,
+      role: 'admin'
+    })
+
+    console.log(`Admin account created: ${email}`)
   }
 
-  const hashed = await bcrypt.hash(password, 10)
-  await User.create({ name, email, password: hashed, role: 'admin' })
-  console.log(`Admin account created: ${email}`)
   await mongoose.disconnect()
   process.exit(0)
 }
 
-run().catch((err) => {
+run().catch(async (err) => {
   console.error(err)
+  await mongoose.disconnect()
   process.exit(1)
 })
